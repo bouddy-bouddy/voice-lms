@@ -102,7 +102,7 @@ interface ActivationLog {
 }
 
 interface PageProps {
-  params: { id: string };
+  params: { id: Promise<string> };
 }
 
 export default function LicenseDetailPage({ params }: PageProps) {
