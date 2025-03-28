@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run vercel-build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "nextjs",
+  "regions": ["dub1"],
+  "github": {
+    "silent": true
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
