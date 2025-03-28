@@ -52,7 +52,6 @@ import { Badge } from "@/components/ui";
 import {
   AlertCircle,
   ArrowLeft,
-  Calendar,
   Clock,
   Computer,
   Edit,
@@ -102,11 +101,11 @@ interface ActivationLog {
   details: string | null;
 }
 
-export default function LicenseDetailPage({
-  params,
-}: {
+interface PageProps {
   params: { id: string };
-}) {
+}
+
+export default function LicenseDetailPage({ params }: PageProps) {
   const router = useRouter();
   const [license, setLicense] = useState<License | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
