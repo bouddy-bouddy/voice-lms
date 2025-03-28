@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --no-lint",
-    "vercel-build": "npm install --legacy-peer-deps && next build --no-lint",
     "start": "next start",
     "lint": "next lint"
   },
