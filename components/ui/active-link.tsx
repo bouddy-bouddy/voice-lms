@@ -22,8 +22,12 @@ export function ActiveLink({
   onClick,
 }: ActiveLinkProps) {
   const pathname = usePathname();
+  const isRootAdmin = href === "/admin";
+
   const isActive = exact
     ? pathname === href
+    : isRootAdmin
+    ? pathname === href // For /admin, only be active if exact match
     : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
