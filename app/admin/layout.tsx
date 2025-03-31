@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
-import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { ActiveLink } from "@/components/ui";
 import {
   LayoutDashboard,
   KeyRound,
@@ -86,14 +86,15 @@ export default function AdminLayout({
           <ul className="space-y-2 font-medium">
             {navigation.map((item) => (
               <li key={item.name}>
-                <Link
+                <ActiveLink
                   href={item.href}
                   className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
+                  activeClassName="bg-gray-100 text-gray-900 font-medium border-l-4 border-blue-500 pl-1"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <item.icon className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
+                  <item.icon className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 group-[.bg-gray-100]:text-blue-500" />
                   <span className="ml-3">{item.name}</span>
-                </Link>
+                </ActiveLink>
               </li>
             ))}
           </ul>
