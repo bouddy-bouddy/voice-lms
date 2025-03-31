@@ -102,7 +102,10 @@ interface ActivationLog {
 }
 
 interface PageProps {
-  params: { id: Promise<string> };
+  params: {
+    id: string;
+  };
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
 export default function LicenseDetailPage({ params }: PageProps) {
@@ -163,13 +166,13 @@ export default function LicenseDetailPage({ params }: PageProps) {
   useEffect(() => {
     const resolveParams = async () => {
       // Get the id from params which is a Promise in Next.js 15
-      const id = await Promise.resolve(params.id);
+      const id = params.id;
       setLicenseId(id);
       fetchLicense(id);
     };
 
     resolveParams();
-  }, [params]);
+  }, [params.id]);
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,8 +276,6 @@ export default function LicenseDetailPage({ params }: PageProps) {
         return <Badge className="bg-gray-500">Unknown</Badge>;
     }
   };
-
-  // Using the DateDisplay component for dates
 
   // Format timestamp for logs
   const formatTimestamp = (dateString: string) => {
