@@ -18,11 +18,14 @@ const licenseUpdateSchema = z.object({
   status: z.enum(["ACTIVE", "EXPIRED", "REVOKED"]).optional(),
 });
 
+type ParamsType = {
+  params: {
+    id: string;
+  };
+};
+
 // Get a single license by ID
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: ParamsType) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -33,7 +36,7 @@ export async function GET(
     // Connect to MongoDB
     await dbConnect();
 
-    const id = await params.id;
+    const id = params.id;
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -105,10 +108,7 @@ export async function GET(
 }
 
 // Update a license
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: ParamsType) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -119,7 +119,7 @@ export async function PATCH(
     // Connect to MongoDB
     await dbConnect();
 
-    const id = await params.id;
+    const id = params.id;
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -130,7 +130,7 @@ export async function PATCH(
     }
 
     // Validate input
-    const body = await req.json();
+    const body = await request.json();
     const validationResult = licenseUpdateSchema.safeParse(body);
 
     if (!validationResult.success) {
@@ -187,10 +187,7 @@ export async function PATCH(
 }
 
 // Delete a license
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: ParamsType) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -201,7 +198,7 @@ export async function DELETE(
     // Connect to MongoDB
     await dbConnect();
 
-    const id = await params.id;
+    const id = params.id;
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
