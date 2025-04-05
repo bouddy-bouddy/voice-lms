@@ -144,34 +144,68 @@ export async function PATCH(
 
     // If expiration date is provided, convert to Date
     if (updateData.expiresAt) {
-      updateData.expiresAt = new Date(updateData.expiresAt);
+      // Create an explicit updateObject to maintain type safety
+      const updateObject: any = { ...updateData };
+      updateObject.expiresAt = new Date(updateData.expiresAt);
+
+      // Update the license with the properly typed object
+      const license = await models.License.findByIdAndUpdate(
+        id,
+        {
+          ...updateObject,
+          updatedAt: new Date(),
+        },
+        { new: true } // Return the updated document
+      );
+
+      if (!license) {
+        return NextResponse.json(
+          { error: "License not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        message: "License updated successfully",
+        license: {
+          id: license._id.toString(),
+          licenseKey: license.licenseKey,
+          fullName: license.fullName,
+          email: license.email,
+          status: license.status,
+          expiresAt: license.expiresAt,
+        },
+      });
+    } else {
+      // If no expiration date is provided, just update with the data as is
+      const license = await models.License.findByIdAndUpdate(
+        id,
+        {
+          ...updateData,
+          updatedAt: new Date(),
+        },
+        { new: true } // Return the updated document
+      );
+
+      if (!license) {
+        return NextResponse.json(
+          { error: "License not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        message: "License updated successfully",
+        license: {
+          id: license._id.toString(),
+          licenseKey: license.licenseKey,
+          fullName: license.fullName,
+          email: license.email,
+          status: license.status,
+          expiresAt: license.expiresAt,
+        },
+      });
     }
-
-    // Update the license
-    const license = await models.License.findByIdAndUpdate(
-      id,
-      {
-        ...updateData,
-        updatedAt: new Date(),
-      },
-      { new: true } // Return the updated document
-    );
-
-    if (!license) {
-      return NextResponse.json({ error: "License not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      message: "License updated successfully",
-      license: {
-        id: license._id.toString(),
-        licenseKey: license.licenseKey,
-        fullName: license.fullName,
-        email: license.email,
-        status: license.status,
-        expiresAt: license.expiresAt,
-      },
-    });
   } catch (error) {
     console.error("Error updating license:", error);
 
