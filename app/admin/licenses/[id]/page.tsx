@@ -101,10 +101,9 @@ interface ActivationLog {
   details: string | null;
 }
 
+// Updated interface for Next.js 15 compatibility
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: { id: string };
   searchParams: Record<string, string | string[] | undefined>;
 }
 
@@ -164,15 +163,11 @@ export default function LicenseDetailPage({ params }: PageProps) {
 
   // Initialize with license details
   useEffect(() => {
-    const resolveParams = async () => {
-      // Get the id from params which is a Promise in Next.js 15
-      const id = params.id;
-      setLicenseId(id);
-      fetchLicense(id);
-    };
-
-    resolveParams();
-  }, [params.id]);
+    if (params && params.id) {
+      setLicenseId(params.id);
+      fetchLicense(params.id);
+    }
+  }, [params]);
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
