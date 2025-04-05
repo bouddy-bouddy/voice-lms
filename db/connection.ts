@@ -12,41 +12,47 @@ if (!MONGODB_URI) {
  * during API Route usage.
  */
 
-// Add this to make TypeScript happy
-declare global {
-  // eslint-disable-next-line no-var
-  var mongoose: { conn: any; promise: any } | undefined;
-}
+// A way to bypass TypeScript errors with global objects
+// that works well with Next.js and TypeScript
+let cached: {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+} = { conn: null, promise: null };
 
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Only use the global cache in development
+if (process.env.NODE_ENV === "development") {
+  // @ts-ignore - Ignoring the TypeScript error for global mongoose
+  if (!global._mongooseCache) {
+    // @ts-ignore - Ignoring the TypeScript error for global mongoose
+    global._mongooseCache = { conn: null, promise: null };
+  }
+  // @ts-ignore - Ignoring the TypeScript error for global mongoose
+  cached = global._mongooseCache;
 }
 
 async function dbConnect() {
-  if (cached!.conn) {
-    return cached!.conn;
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  if (!cached!.promise) {
+  if (!cached.promise) {
     const opts = {
       bufferCommands: false,
     };
 
-    cached!.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       return mongoose;
     });
   }
 
   try {
-    cached!.conn = await cached!.promise;
+    cached.conn = await cached.promise;
   } catch (e) {
-    cached!.promise = null;
+    cached.promise = null;
     throw e;
   }
 
-  return cached!.conn;
+  return cached.conn;
 }
 
 export default dbConnect;
