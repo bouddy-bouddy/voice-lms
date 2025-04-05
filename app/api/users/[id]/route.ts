@@ -66,7 +66,7 @@ export async function GET(
 // Update a user
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -78,7 +78,7 @@ export async function PATCH(
     // Connect to MongoDB
     await dbConnect();
 
-    const id = params.id;
+    const id = (await params).id;
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
