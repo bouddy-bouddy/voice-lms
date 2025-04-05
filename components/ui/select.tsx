@@ -103,10 +103,19 @@ function SelectItem({
   children,
   value,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Item>) {
+}: React.ComponentProps<typeof SelectPrimitive.Item> & {
+  value?: string;
+}) {
+  // The Radix UI Select.Item component requires a non-empty string value
+  // Ensure we never have empty string values - use a unique identifier if value is empty
+  const safeValue =
+    !value || value === ""
+      ? `item-${React.useId()}` // Generate unique ID for empty values
+      : value;
+
   return (
     <SelectPrimitive.Item
-      value={value || undefined}
+      value={safeValue}
       data-slot="select-item"
       className={cn(
         "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
