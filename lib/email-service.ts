@@ -114,18 +114,20 @@ export async function sendLicenseEmailWithTextFallback(
     console.error("Failed to send license email:", error);
 
     // Try to determine if it's a connection error
-    if (error.code === "ECONNREFUSED") {
-      console.error(
-        "Connection to SMTP server refused. Check your EMAIL_HOST and EMAIL_PORT settings."
-      );
-    } else if (error.code === "ETIMEDOUT") {
-      console.error(
-        "Connection to SMTP server timed out. Check your network and firewall settings."
-      );
-    } else if (error.code === "EAUTH") {
-      console.error(
-        "Authentication failed. Check your EMAIL_USER and EMAIL_PASSWORD settings."
-      );
+    if (error && typeof error === "object" && "code" in error) {
+      if (error.code === "ECONNREFUSED") {
+        console.error(
+          "Connection to SMTP server refused. Check your EMAIL_HOST and EMAIL_PORT settings."
+        );
+      } else if (error.code === "ETIMEDOUT") {
+        console.error(
+          "Connection to SMTP server timed out. Check your network and firewall settings."
+        );
+      } else if (error.code === "EAUTH") {
+        console.error(
+          "Authentication failed. Check your EMAIL_USER and EMAIL_PASSWORD settings."
+        );
+      }
     }
 
     return false;
@@ -196,7 +198,9 @@ export async function testEmailConnection(): Promise<{
   } catch (error) {
     return {
       success: false,
-      message: `SMTP connection failed: ${error.message}`,
+      message: `SMTP connection failed: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
     };
   }
 }
