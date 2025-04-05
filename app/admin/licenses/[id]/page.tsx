@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import {
   Card,
@@ -101,14 +101,9 @@ interface ActivationLog {
   details: string | null;
 }
 
-// Updated interface for Next.js 15 compatibility
-interface PageProps {
-  params: { id: string };
-  searchParams: Record<string, string | string[] | undefined>;
-}
-
-export default function LicenseDetailPage({ params }: PageProps) {
+export default function LicenseDetailPage() {
   const router = useRouter();
+  const params = useParams();
   const [license, setLicense] = useState<License | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -164,8 +159,9 @@ export default function LicenseDetailPage({ params }: PageProps) {
   // Initialize with license details
   useEffect(() => {
     if (params && params.id) {
-      setLicenseId(params.id);
-      fetchLicense(params.id);
+      const id = Array.isArray(params.id) ? params.id[0] : params.id;
+      setLicenseId(id);
+      fetchLicense(id);
     }
   }, [params]);
 
