@@ -3,6 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import { useState, useEffect } from "react";
+import styles from "./provider.module.css";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   // Use client-side rendering to avoid hydration issues
@@ -18,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         {isMounted ? (
           children
         ) : (
-          <div style={{ visibility: "hidden" }}>{children}</div>
+          <div className={styles.hiddenContent}>{children}</div>
         )}
       </ThemeProvider>
     </SessionProvider>
