@@ -18,7 +18,7 @@ const userUpdateSchema = z.object({
 // Get a single user by ID
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -30,7 +30,7 @@ export async function GET(
     // Connect to MongoDB
     await dbConnect();
 
-    const id = params.id;
+    const id = (await params).id;
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -159,7 +159,7 @@ export async function PATCH(
 // Delete a user
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -171,7 +171,7 @@ export async function DELETE(
     // Connect to MongoDB
     await dbConnect();
 
-    const id = params.id;
+    const id = (await params).id;
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
