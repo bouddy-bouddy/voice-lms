@@ -108,10 +108,18 @@ export async function PUT(req: NextRequest) {
       settings = await Settings.create({});
     }
 
-    // Update settings
-    Object.keys(updateData).forEach((key) => {
-      if (key !== "emailPassword" || updateData.emailPassword) {
-        settings[key] = updateData[key];
+    // Update settings - Using type-safe approach
+    // Fix for the TypeScript error - use explicit typecasting
+    Object.entries(updateData).forEach(([key, value]) => {
+      // Skip empty password (we don't want to overwrite with empty string)
+      if (key === "emailPassword" && !value) {
+        return;
+      }
+
+      // Use type assertion to tell TypeScript this is a valid key
+      // This is safe because we've already validated the data with Zod
+      if (key in settings) {
+        (settings as any)[key] = value;
       }
     });
 
