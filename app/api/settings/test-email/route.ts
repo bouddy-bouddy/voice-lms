@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/db/connection";
 import mongoose from "mongoose";
+// Add a type declaration for nodemailer
 import nodemailer from "nodemailer";
 import { z } from "zod";
 
