@@ -18,14 +18,11 @@ const licenseUpdateSchema = z.object({
   status: z.enum(["ACTIVE", "EXPIRED", "REVOKED"]).optional(),
 });
 
-type ParamsType = {
-  params: {
-    id: string;
-  };
-};
-
 // Get a single license by ID
-export async function GET(request: NextRequest, { params }: ParamsType) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -108,7 +105,10 @@ export async function GET(request: NextRequest, { params }: ParamsType) {
 }
 
 // Update a license
-export async function PATCH(request: NextRequest, { params }: ParamsType) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -187,7 +187,10 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
 }
 
 // Delete a license
-export async function DELETE(request: NextRequest, { params }: ParamsType) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
