@@ -40,18 +40,23 @@ function getDeviceInfo(req: NextRequest) {
 // Activate a license for a specific device
 export async function POST(req: NextRequest) {
   try {
+    console.log("[ACTIVATE] Received activation request");
+
     // Connect to MongoDB
     await dbConnect();
 
     // Validate input
     const body = await req.json();
+    console.log("[ACTIVATE] Request body:", body);
+
     const validationResult = activationSchema.safeParse(body);
 
     if (!validationResult.success) {
+      console.log("[ACTIVATE] Validation failed:", validationResult.error);
       return NextResponse.json(
         {
           success: false,
-          error: "Invalid input data",
+          error: "Invalid input data: " + validationResult.error.message,
         },
         { status: 400 }
       );
@@ -66,11 +71,20 @@ export async function POST(req: NextRequest) {
     const deviceInfo = getDeviceInfo(req);
     const finalDeviceName = deviceName || deviceInfo.name;
 
+    console.log("[ACTIVATE] Processed request data:", {
+      licenseKey,
+      deviceId,
+      finalDeviceName,
+      ipAddress,
+    });
+
     // Find the license
     const license = await models.License.findOne({ licenseKey });
 
     // If license doesn't exist
     if (!license) {
+      console.log("[ACTIVATE] License not found:", licenseKey);
+
       // Log the failed activation attempt
       await models.ActivationLog.create({
         licenseId: "unknown",
@@ -90,8 +104,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log("[ACTIVATE] License found:", {
+      id: license._id,
+      status: license.status,
+      expiresAt: license.expiresAt,
+    });
+
     // Check if license is active
     if (license.status !== LicenseStatus.ACTIVE) {
+      console.log("[ACTIVATE] License not active:", license.status);
+
       await models.ActivationLog.create({
         licenseId: license._id,
         deviceId,
@@ -112,6 +134,8 @@ export async function POST(req: NextRequest) {
 
     // Check if license has expired
     if (license.expiresAt < new Date()) {
+      console.log("[ACTIVATE] License expired:", license.expiresAt);
+
       // Update license status to EXPIRED
       await models.License.findByIdAndUpdate(license._id, {
         status: LicenseStatus.EXPIRED,
@@ -144,6 +168,8 @@ export async function POST(req: NextRequest) {
     const existingDevice = devices.find((d) => d.deviceId === deviceId);
 
     if (existingDevice) {
+      console.log("[ACTIVATE] Device already registered:", deviceId);
+
       // Update last seen
       await models.Device.findByIdAndUpdate(existingDevice._id, {
         lastSeenAt: new Date(),
@@ -159,6 +185,14 @@ export async function POST(req: NextRequest) {
         details: "Device already activated",
       });
 
+      // Calculate days remaining
+      const daysRemaining = Math.max(
+        0,
+        Math.ceil(
+          (license.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        )
+      );
+
       return NextResponse.json({
         success: true,
         message: "License is valid",
@@ -166,12 +200,18 @@ export async function POST(req: NextRequest) {
           fullName: license.fullName,
           expiresAt: license.expiresAt.toISOString(),
           status: license.status,
+          daysRemaining,
         },
       });
     }
 
     // Check if max devices limit reached
     if (devices.length >= license.maxDevices) {
+      console.log("[ACTIVATE] Max device limit reached:", {
+        current: devices.length,
+        max: license.maxDevices,
+      });
+
       await models.ActivationLog.create({
         licenseId: license._id,
         deviceId,
@@ -203,6 +243,8 @@ export async function POST(req: NextRequest) {
       lastSeenAt: new Date(),
     });
 
+    console.log("[ACTIVATE] New device registered:", deviceId);
+
     await models.ActivationLog.create({
       licenseId: license._id,
       deviceId,
@@ -214,6 +256,16 @@ export async function POST(req: NextRequest) {
       } of ${license.maxDevices}`,
     });
 
+    // Calculate days remaining
+    const daysRemaining = Math.max(
+      0,
+      Math.ceil(
+        (license.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      )
+    );
+
+    console.log("[ACTIVATE] Activation successful, returning license info");
+
     return NextResponse.json({
       success: true,
       message: "License activated successfully",
@@ -223,14 +275,17 @@ export async function POST(req: NextRequest) {
         status: license.status,
         deviceCount: devices.length + 1,
         maxDevices: license.maxDevices,
+        daysRemaining,
       },
     });
   } catch (error) {
-    console.error("Error activating license:", error);
+    console.error("[ACTIVATE] Error activating license:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to activate license",
+        error:
+          "Failed to activate license: " +
+          (error instanceof Error ? error.message : "Unknown error"),
       },
       { status: 500 }
     );
